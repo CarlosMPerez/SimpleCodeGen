@@ -6,7 +6,7 @@ using System.Data.SqlClient;
 using System.Configuration;
 using System.Windows.Forms;
 
-namespace GolfCodeGen
+namespace SimpleCodeGen
 {
     public partial class Main : Form
     {
@@ -29,7 +29,7 @@ namespace GolfCodeGen
             SqlConnection conn = new SqlConnection(ConfigurationManager.AppSettings["ConnStr"]);
             conn.Open();
             DataTable dtBases = new DataTable();
-            string sql = "SELECT name FROM master.sys.databases WHERE name LIKE ('db%') ORDER BY name";
+            string sql = "SELECT * FROM master.sys.databases WHERE Cast(CASE WHEN name IN('master', 'model', 'msdb', 'tempdb') THEN 1 ELSE is_distributor END As bit) = 0";
             SqlCommand comm = new SqlCommand();
             comm.CommandText = sql;
             comm.Connection = conn;
@@ -129,8 +129,7 @@ namespace GolfCodeGen
                             strLabel.Text = String.Format("Generando el fichero {0}{1}{2}.generado.{3}", 
                                                             txtRutaCodigoGen.Text, 
                                                             tupla.Item2, type, language);
-                            MessageBox.Show("A");
-                            //TemplateEngine.Generate(tupla.Item1, tupla.Item2, type, language, txtRutaCodigoGen.Text);
+                            TemplateEngine.Generate(tupla.Item1, tupla.Item2, type, language, txtRutaCodigoGen.Text);
                         }
                     }
                 }

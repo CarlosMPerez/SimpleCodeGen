@@ -1,4 +1,4 @@
-﻿namespace GolfCodeGen
+﻿namespace SimpleCodeGen
 {
     partial class Main
     {
@@ -179,7 +179,7 @@
             this.MaximizeBox = false;
             this.Name = "Main";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "GolfCodeGen";
+            this.Text = "SimpleCodeGen";
             this.Load += new System.EventHandler(this.Main_Load);
             this.strStatus.ResumeLayout(false);
             this.strStatus.PerformLayout();

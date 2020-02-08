@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 
-namespace GolfCodeGen
+namespace SimpleCodeGen
 {
     static class Program
     {
