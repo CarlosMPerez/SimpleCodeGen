@@ -98,6 +98,9 @@
   <ItemGroup>
     <None Include="templates\DAL_cs.template.scg" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="TO-DO.txt" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>md templates
