@@ -1,0 +1,49 @@
+'-----------------------------------------------------------------------------------------------'
+' <autogenerado>																				'
+'    Codigo generado mediante plantillas personalizadas de GolfCodeGen.							'
+'    Fecha: <%FechaGeneracion:dd/MM/yyyy%>														'
+'    Version GSCodeGen: 0.1																	'
+'																								'
+'    Modificaciones en este archivo pueden generar un funcionamiento incorrecto.				'
+'    Realizar las modificaciones sobre otro archivo con el mismo nombre,						'
+'	 utilizando partial class y almacenado fuera de esta carpeta de archivos autogenerados.		'
+' </autogenerado>																				'
+'-----------------------------------------------------------------------------------------------'
+
+Namespace MGW.<%NombreBaseDatosSinPrefijo%>
+    <Serializable()> _
+    Partial Public Class <%NombreClase%>
+		<%fe Columnas%>Private m<%NombreColumna%> As System.<%TipoClr%>
+		<%/fe Columnas%>
+		<%fe Columnas%>
+		Public Property <%NombreColumna%>() As System.<%TipoClr%>
+			Get
+				Return m<%NombreColumna%>
+			End Get
+			Set (ByVal value as System.<%TipoClr%>)
+				m<%NombreColumna%> = value
+			End Set
+		End Property
+		<%/fe Columnas%>
+    End Class
+
+    <Serializable()> _
+    Partial Public Class <%NombreTablaSinPrefijo%>Coleccion
+        Inherits System.Collections.Generic.List(Of <%NombreClase%>)
+    End Class
+	
+	<Serializable()> _
+	Partial Public Class <%NombreClase%>Filtro
+		<%fe Columnas%>
+		Private m<%NombreColumna%> As  System.Nullable(of System.<%TipoClr%>)
+		Public Property <%NombreColumna%>() As  System.Nullable(of System.<%TipoClr%>)
+			Get
+				Return m<%NombreColumna%>
+			End Get
+			Set (ByVal value As System.Nullable(of System.<%TipoClr%>))
+				m<%NombreColumna%> = value
+			End Set
+		End Property
+		<%/fe Columnas%>
+    End Class
+End Namespace

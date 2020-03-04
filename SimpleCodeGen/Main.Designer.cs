@@ -31,6 +31,7 @@
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Main));
             this.tvTablas = new System.Windows.Forms.TreeView();
+            this.imgLista = new System.Windows.Forms.ImageList(this.components);
             this.lblTablas = new System.Windows.Forms.Label();
             this.lblPlantilla = new System.Windows.Forms.Label();
             this.lstPlantillas = new System.Windows.Forms.ListView();
@@ -39,10 +40,7 @@
             this.btnRutaCodigoGen = new System.Windows.Forms.Button();
             this.btnGenerateCode = new System.Windows.Forms.Button();
             this.dlgRutaCodigo = new System.Windows.Forms.FolderBrowserDialog();
-            this.strStatus = new System.Windows.Forms.StatusStrip();
-            this.strLabel = new System.Windows.Forms.ToolStripStatusLabel();
-            this.imgLista = new System.Windows.Forms.ImageList(this.components);
-            this.strStatus.SuspendLayout();
+            this.txtResultados = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // tvTablas
@@ -57,6 +55,13 @@
             this.tvTablas.Size = new System.Drawing.Size(391, 498);
             this.tvTablas.TabIndex = 0;
             this.tvTablas.AfterCheck += new System.Windows.Forms.TreeViewEventHandler(this.tvTablas_AfterCheck);
+            // 
+            // imgLista
+            // 
+            this.imgLista.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imgLista.ImageStream")));
+            this.imgLista.TransparentColor = System.Drawing.Color.Transparent;
+            this.imgLista.Images.SetKeyName(0, "bdd.png");
+            this.imgLista.Images.SetKeyName(1, "table.png");
             // 
             // lblTablas
             // 
@@ -105,7 +110,7 @@
             // 
             // txtRutaCodigoGen
             // 
-            this.txtRutaCodigoGen.Location = new System.Drawing.Point(424, 289);
+            this.txtRutaCodigoGen.Location = new System.Drawing.Point(424, 273);
             this.txtRutaCodigoGen.Name = "txtRutaCodigoGen";
             this.txtRutaCodigoGen.Size = new System.Drawing.Size(378, 20);
             this.txtRutaCodigoGen.TabIndex = 5;
@@ -114,7 +119,7 @@
             // 
             this.btnRutaCodigoGen.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnRutaCodigoGen.Font = new System.Drawing.Font("Verdana", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnRutaCodigoGen.Location = new System.Drawing.Point(808, 287);
+            this.btnRutaCodigoGen.Location = new System.Drawing.Point(808, 271);
             this.btnRutaCodigoGen.Name = "btnRutaCodigoGen";
             this.btnRutaCodigoGen.Size = new System.Drawing.Size(37, 23);
             this.btnRutaCodigoGen.TabIndex = 6;
@@ -126,9 +131,9 @@
             // 
             this.btnGenerateCode.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnGenerateCode.Font = new System.Drawing.Font("Verdana", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnGenerateCode.Location = new System.Drawing.Point(529, 335);
+            this.btnGenerateCode.Location = new System.Drawing.Point(529, 299);
             this.btnGenerateCode.Name = "btnGenerateCode";
-            this.btnGenerateCode.Size = new System.Drawing.Size(175, 58);
+            this.btnGenerateCode.Size = new System.Drawing.Size(175, 35);
             this.btnGenerateCode.TabIndex = 7;
             this.btnGenerateCode.Text = "Generar Código";
             this.btnGenerateCode.UseVisualStyleBackColor = true;
@@ -138,34 +143,21 @@
             // 
             this.dlgRutaCodigo.RootFolder = System.Environment.SpecialFolder.MyComputer;
             // 
-            // strStatus
+            // txtResultados
             // 
-            this.strStatus.Font = new System.Drawing.Font("Verdana", 10F);
-            this.strStatus.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.strLabel});
-            this.strStatus.Location = new System.Drawing.Point(0, 550);
-            this.strStatus.Name = "strStatus";
-            this.strStatus.Size = new System.Drawing.Size(857, 22);
-            this.strStatus.TabIndex = 8;
-            // 
-            // strLabel
-            // 
-            this.strLabel.Name = "strLabel";
-            this.strLabel.Size = new System.Drawing.Size(0, 17);
-            // 
-            // imgLista
-            // 
-            this.imgLista.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imgLista.ImageStream")));
-            this.imgLista.TransparentColor = System.Drawing.Color.Transparent;
-            this.imgLista.Images.SetKeyName(0, "bdd.png");
-            this.imgLista.Images.SetKeyName(1, "table.png");
+            this.txtResultados.Location = new System.Drawing.Point(424, 356);
+            this.txtResultados.Multiline = true;
+            this.txtResultados.Name = "txtResultados";
+            this.txtResultados.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.txtResultados.Size = new System.Drawing.Size(421, 184);
+            this.txtResultados.TabIndex = 9;
             // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(857, 572);
-            this.Controls.Add(this.strStatus);
+            this.Controls.Add(this.txtResultados);
             this.Controls.Add(this.btnGenerateCode);
             this.Controls.Add(this.btnRutaCodigoGen);
             this.Controls.Add(this.txtRutaCodigoGen);
@@ -181,8 +173,6 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "SimpleCodeGen";
             this.Load += new System.EventHandler(this.Main_Load);
-            this.strStatus.ResumeLayout(false);
-            this.strStatus.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -199,9 +189,10 @@
         private System.Windows.Forms.Button btnRutaCodigoGen;
         private System.Windows.Forms.Button btnGenerateCode;
         private System.Windows.Forms.FolderBrowserDialog dlgRutaCodigo;
-        private System.Windows.Forms.StatusStrip strStatus;
-        private System.Windows.Forms.ToolStripStatusLabel strLabel;
         private System.Windows.Forms.ImageList imgLista;
+        private System.Windows.Forms.TextBox txtResultados;
     }
 }
+
+
 

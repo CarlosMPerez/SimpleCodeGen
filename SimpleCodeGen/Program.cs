@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NLightTemplate;
+using System;
 using System.Windows.Forms;
 
 namespace SimpleCodeGen
@@ -13,6 +14,12 @@ namespace SimpleCodeGen
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            //Configuración común de StringTemplate
+            StringTemplate.Configure
+                .OpenToken("<%")
+                .CloseToken("%>")
+                .IfToken("if")
+                .ForeachToken("fe");
             Application.Run(new Main());
         }
     }

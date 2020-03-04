@@ -1,9 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Data;
-using System.Data.SqlClient;
-using System.Configuration;
 using System.Windows.Forms;
 
 namespace SimpleCodeGen
@@ -19,6 +16,7 @@ namespace SimpleCodeGen
         {
             LoadTreeView();
             LoadTemplates();
+            LoadDefaultGenPath();
         }
 
         /// <summary>
@@ -26,39 +24,16 @@ namespace SimpleCodeGen
         /// </summary>
         private void LoadTreeView()
         {
-            SqlConnection conn = new SqlConnection(ConfigurationManager.AppSettings["ConnStr"]);
-            conn.Open();
-            DataTable dtBases = new DataTable();
-            string sql = "SELECT * FROM master.sys.databases WHERE Cast(CASE WHEN name IN('master', 'model', 'msdb', 'tempdb') THEN 1 ELSE is_distributor END As bit) = 0";
-            SqlCommand comm = new SqlCommand();
-            comm.CommandText = sql;
-            comm.Connection = conn;
-            SqlDataAdapter da = new SqlDataAdapter();
-            da.SelectCommand = comm;
-            da.Fill(dtBases);
-
-            foreach (DataRow row in dtBases.Rows)
+            foreach (string dbName in DBEngine.GetDatabases())
             {
-                string dbName = row["name"].ToString();
                 TreeNode parentNode = new TreeNode(dbName, 0, 0);
-
-                // Añadimos los hijos
-                sql = String.Format("SELECT table_name FROM {0}.INFORMATION_SCHEMA.TABLES " +
-                    "WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME NOT IN ('sysdiagrams', 'dtproperties') ORDER BY TABLE_NAME", dbName);
-                DataTable dtTables = new DataTable();
-                comm.CommandText = sql;
-                da.SelectCommand = comm;
-                da.Fill(dtTables);
-                foreach (DataRow subRow in dtTables.Rows)
+                foreach (string tableName in DBEngine.GetTables(dbName))
                 {
-                    string tableName = subRow["table_name"].ToString();
                     TreeNode childNode = new TreeNode(tableName, 1, 1);
                     parentNode.Nodes.Add(childNode);
                 }
                 tvTablas.Nodes.Add(parentNode);
             }
-
-            conn.Close();
         }
 
         /// <summary>
@@ -66,10 +41,15 @@ namespace SimpleCodeGen
         /// </summary>
         private void LoadTemplates()
         {
-            foreach(string fichero in Directory.EnumerateFiles("templates", "*.gst"))
+            foreach (string fichero in Directory.EnumerateFiles("templates", "*.template.scg"))
             {
-                lstPlantillas.Items.Add(Path.GetFileName(fichero));
+                lstPlantillas.Items.Add(Path.GetFileNameWithoutExtension(fichero));
             }
+        }
+
+        private void LoadDefaultGenPath()
+        {
+            txtRutaCodigoGen.Text = AppContext.BaseDirectory.ToString();
         }
 
         /// <summary>
@@ -79,6 +59,7 @@ namespace SimpleCodeGen
         /// <param name="e"></param>
         private void btnRutaCodigoGen_Click(object sender, EventArgs e)
         {
+            dlgRutaCodigo.SelectedPath = txtRutaCodigoGen.Text;
             if (dlgRutaCodigo.ShowDialog() == DialogResult.OK)
             {
                 txtRutaCodigoGen.Text = dlgRutaCodigo.SelectedPath;
@@ -94,6 +75,7 @@ namespace SimpleCodeGen
         {
             if (ValidateControls())
             {
+                Application.UseWaitCursor = true;
                 List<Tuple<string, string>> tablasAProcesar = new List<Tuple<string, string>>();
                 // Bloqueamos los controles mientras se procesa la cosa
                 tvTablas.Enabled = false;
@@ -115,25 +97,29 @@ namespace SimpleCodeGen
                     }
                 }
 
-                foreach(Tuple<string, string> tupla in tablasAProcesar)
+                foreach (Tuple<string, string> tupla in tablasAProcesar)
                 {
-                    foreach(ListViewItem item in lstPlantillas.Items)
+                    foreach (ListViewItem item in lstPlantillas.Items)
                     {
-                        if(item.Checked)
+                        if (item.Checked)
                         {
-                            int posUnder = item.Text.IndexOf('_');
-                            int posDot = item.Text.IndexOf('.');
-                            string type = item.Text.Substring(0, posUnder);
-                            string language = item.Text.Substring(posUnder + 1, (posDot - posUnder)-1);
+                            //Limpiamos el nombre de la tabla
+                            string tName = tupla.Item2;
+                            if (tName.Substring(3, 1) == "_") tName = tName.Substring(4);
 
-                            strLabel.Text = String.Format("Generando el fichero {0}{1}{2}.generado.{3}", 
-                                                            txtRutaCodigoGen.Text, 
-                                                            tupla.Item2, type, language);
-                            TemplateEngine.Generate(tupla.Item1, tupla.Item2, type, language, txtRutaCodigoGen.Text);
+                            txtResultados.AppendText(String.Format("Creando {0}{1}.generado.vb ... ", tName, item.Text));
+
+                            TemplateEngine.Generate(tupla.Item1, tupla.Item2,
+                                Path.Combine(txtRutaCodigoGen.Text, String.Format("{0}{1}.generado.vb", tName, item.Text)),
+                                String.Format(@"templates\{0}.scg", item.Text));
+
+                            txtResultados.AppendText("OK" + Environment.NewLine);
                         }
+                        Application.DoEvents();
                     }
                 }
-
+                txtResultados.AppendText("Proceso Terminado." + Environment.NewLine);
+                Application.UseWaitCursor = false;
             }
 
 
@@ -142,7 +128,6 @@ namespace SimpleCodeGen
             tvTablas.Enabled = true;
             lstPlantillas.Enabled = true;
             btnGenerateCode.Enabled = true;
-            strLabel.Text = "";
         }
 
         /// <summary>
@@ -163,7 +148,7 @@ namespace SimpleCodeGen
                 {
                     foreach (TreeNode son in parent.Nodes)
                     {
-                        if(son.Checked)
+                        if (son.Checked)
                         {
                             someNodeIsChecked = true;
                             break;
@@ -174,9 +159,9 @@ namespace SimpleCodeGen
             }
 
             bool someTemplateIsChecked = false;
-            foreach(ListViewItem item in lstPlantillas.Items)
+            foreach (ListViewItem item in lstPlantillas.Items)
             {
-                if(item.Checked)
+                if (item.Checked)
                 {
                     someTemplateIsChecked = true;
                     break;
@@ -184,9 +169,9 @@ namespace SimpleCodeGen
             }
 
             bool pathIsSet = false;
-            if(txtRutaCodigoGen.Text != "")
+            if (txtRutaCodigoGen.Text != "")
             {
-                if(Directory.Exists(txtRutaCodigoGen.Text))
+                if (Directory.Exists(txtRutaCodigoGen.Text))
                 {
                     pathIsSet = true;
                 }
@@ -195,7 +180,7 @@ namespace SimpleCodeGen
 
             if (!someNodeIsChecked)
             {
-                MessageBox.Show("Debe seleccionar alguna tabla de la base de datos", 
+                MessageBox.Show("Debe seleccionar alguna tabla de la base de datos",
                     "Error de validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
             }
@@ -230,7 +215,7 @@ namespace SimpleCodeGen
             {
                 if (parent.Checked) parent.Expand();
                 else parent.Collapse();
-                foreach(TreeNode node in parent.Nodes)
+                foreach (TreeNode node in parent.Nodes)
                 {
                     node.Checked = parent.Checked;
                 }

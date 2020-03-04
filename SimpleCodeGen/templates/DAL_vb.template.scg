@@ -1,0 +1,295 @@
+'------------------------------------------------------------------------------
+' <autogenerado>
+'    Codigo generado mediante plantillas personalizadas de GolfCodeGen.
+'    Fecha: <%FechaGeneracion:dd/MM/yyyy%>    
+'    Version GSCodeGen: 0.1
+'
+'    Modificaciones en este archivo pueden generar un funcionamiento incorrecto.
+'    Realizar las modificaciones sobre otro archivo con el mismo nombre, 
+'	 utilizando partial class y almacenado fuera de esta carpeta de archivos autogenerados.
+' </autogenerado>
+'------------------------------------------------------------------------------
+
+Imports System.Data
+Imports System.Data.SqlClient
+
+Namespace MGW.<%NombreBaseDatosSinPrefijo%>
+
+    Partial Public Class <%NombreClase%>
+
+		''' <summary>
+		''' Crea un objeto <%NombreClase%> a partir del registro de un DataReader
+		''' </summary>
+		''' <remarks></remarks>
+		Private Shared Function zCrearUnoDelReader(ByVal dr As IDataRecord) As MGW.<%NombreBaseDatosSinPrefijo%>.<%NombreClase%>
+			Dim nuevoItem As New MGW.<%NombreBaseDatosSinPrefijo%>.<%NombreClase%>()
+			
+			<%fe Columnas%>nuevoItem.<%NombreColumna%> = dr("<%NombreColumna%>")
+			<%/fe Columnas%>
+			Return nuevoItem
+        End Function
+
+		''' <summary>
+		''' Carga todos los registros que no hayan sido borrados lógicamente de <%NombreTabla%>
+		''' en el datatable pasado como parámetro
+		''' </summary>
+		''' <remarks></remarks>
+        Public Shared Function zRellenarDataTable(ByVal dt As DataTable, iIdRefCampo as int32, _
+													Optional ByVal conexion As SqlConnection = Nothing, _
+													Optional ByVal transaccion As SqlTransaction = Nothing) As Integer
+            Dim SQL As String = ""
+            Dim comando As SqlCommand
+            Dim adapter As SqlDataAdapter
+			SQL = "SELECT <%ListaNombreColumnas%> " & _
+				  "FROM <%NombreTabla%> " & _
+				  "WHERE BorradoLogico = 0;"
+            comando = New SqlCommand
+            comando.CommandText = SQL
+            comando.CommandType = CommandType.Text
+            comando.Transaction = transaccion
+            dt.Clear()
+            adapter = New SqlDataAdapter
+            adapter.SelectCommand = comando
+			If conexion Is Nothing Then
+            	conexion = New SqlConnection()
+            	conexion.ConnectionString = DAL.ConectDal.DevolverCadenaConexion(iIdRefCampo)
+            End If
+            comando.Connection = conexion
+            Return adapter.Fill(dt)
+        End Function	
+
+		''' <summary>
+		''' Modifica en base de datos el registro correspondiente al objeto recibido
+		''' con los valores del objeto recibido
+		''' </summary>
+		''' <remarks></remarks>
+        Public Shared Function zModificar(ByVal input As MGW.<%NombreBaseDatosSinPrefijo%>.<%NombreClase%>, _
+										iIdRefCampo as int32, Optional ByVal conexion As SqlConnection = Nothing, 
+										Optional ByVal transaccion As SqlTransaction = Nothing) As Integer
+            Dim SQL As String = ""
+            Dim comando As SqlCommand
+            Dim contador As Integer
+			Dim estadoInicialConexion As ConnectionState
+			SQL = "UPDATE <%NombreTabla%> SET <%ListaNombreColumnasParametros%> " & _
+					"WHERE (<%NombreClavePrimaria%> = @<%NombreClavePrimaria%> " & _
+					"AND BorradoLogico= 0);"
+            Try
+                comando = New SqlCommand
+				comando.CommandText = SQL
+                comando.CommandType = CommandType.Text
+                comando.Transaction = transaccion
+			
+				<%fe Columnas%>comando.Parameters.AddWithValue("@<%NombreColumna%>", input.<%NombreColumna%>)
+				<%/fe Columnas%>
+				if conexion IsNot Nothing Then
+					estadoInicialConexion = conexion.State
+				Else
+					conexion = New SqlConnection()
+                	conexion.ConnectionString = DAL.ConectDal.DevolverCadenaConexion(iIdRefCampo)
+                	estadoInicialConexion = ConnectionState.Closed
+                	conexion.Open()
+				End If
+				comando.Connection= conexion
+                contador = comando.ExecuteNonQuery()
+                If contador = 0 Then
+                    Throw New Exception("Error concurrencia")
+                End If
+                Return contador
+            Finally
+                If conexion IsNot Nothing AndAlso estadoInicialConexion = ConnectionState.Closed AndAlso conexion.State <> ConnectionState.Closed Then
+                    conexion.Close()
+                End If               
+            End Try
+        End Function
+
+		''' <summary>
+		''' Inserta un nuevo registro en la base de datos con la información contenida en el 
+		''' objeto <%NombreClase%> pasado como parámetro
+		''' </summary>
+		''' <remarks></remarks>
+        Public Shared Function zInsertar(ByVal input As MGW.<%NombreBaseDatosSinPrefijo%>.<%NombreClase%>, _
+												iIdRefCampo as int32, Optional ByVal conexion As SqlConnection = Nothing, _
+												Optional ByVal transaccion As SqlTransaction = Nothing) As Integer
+            Dim SQL As String = ""
+            Dim comando As SqlCommand
+            Dim contador As Integer
+          	Dim estadoInicialConexion As ConnectionState
+	        SQL = "INSERT INTO <%NombreTabla%> (<%ListaNombreColumnas%>) " & _
+					"VALUES (<%ListaNombreParametros%>); " & _
+					"SELECT @Insertado = SCOPE_IDENTITY(); "
+            Try
+                comando = New SqlCommand(SQL, conexion)
+                comando.CommandType = CommandType.Text
+                comando.Transaction = transaccion
+				
+				<%fe Columnas%>comando.Parameters.AddWithValue("@<%NombreColumna%>", input.<%NombreColumna%>)
+				<%/fe Columnas%>comando.Parameters.Add("@Insertado", SqlDbType.int)
+                comando.Parameters("@Insertado").Direction = ParameterDirection.Output
+
+				If conexion IsNot Nothing Then
+					estadoInicialConexion = conexion.State
+				Else
+					conexion = New SqlConnection()
+					conexion.ConnectionString =  DAL.ConectDal.DevolverCadenaConexion(iIdRefCampo)
+					estadoInicialConexion = ConnectionState.Closed
+					conexion.Open()
+				End If
+				comando.Connection = conexion
+				contador = comando.ExecuteNonQuery()
+				If contador = 1 Then
+                    input.<%NombreClavePrimaria%> = comando.Parameters("@Insertado").Value
+				End If
+
+                Return contador
+           	
+			Finally
+                If conexion IsNot Nothing AndAlso estadoInicialConexion = ConnectionState.Closed AndAlso conexion.State <> ConnectionState.Closed Then
+                    conexion.Close()
+                End If
+            End Try
+
+        End Function
+
+
+		''' <summary>
+		''' Busca en la tabla <%NombreTabla%> por el id proporcionado y 
+		''' devuelve un objeto <%NombreClase%> con sus propiedades cargadas
+		''' </summary>
+		''' <remarks></remarks>
+        Public Shared Function zDevolverPorId(ByVal id As Int32, iIdRefCampo as int32, _
+												Optional ByVal conexion As SqlConnection = Nothing, _
+												Optional ByVal transaccion As SqlTransaction = Nothing) As MGW.<%NombreBaseDatos%>.<%NombreTablaSinPrefijo%>Coleccion
+			Dim SQL As String = ""
+            Dim comando As SqlCommand
+            Dim reader As SqlDataReader = Nothing
+			Dim estadoInicialConexion As ConnectionState
+			Dim coleccion As MGW.<%NombreBaseDatosSinPrefijo%>.<%NombreTablaSinPrefijo%>Coleccion
+			SQL = "SELECT <%ListaNombreColumnas%> " & _
+				  "FROM <%NombreTabla%> WHERE <%NombreClavePrimaria%> = @<%NombreClavePrimaria%> AND BorradoLogico = 0;"
+            Try
+				coleccion = New MGW.<%NombreBaseDatosSinPrefijo%>.<%NombreTablaSinPrefijo%>Coleccion()
+                comando = New SqlCommand
+				comando.CommandText = SQL
+                comando.CommandType = CommandType.Text
+                comando.Transaction = transaccion
+                comando.Parameters.AddWithValue("@<%NombreClavePrimaria%>", id)
+                if conexion IsNot Nothing Then
+					estadoInicialConexion = conexion.State
+				Else
+					conexion = New SqlConnection()
+					conexion.ConnectionString = DAL.ConectDal.DevolverCadenaConexion(iIdRefCampo)
+					estadoInicialConexion = ConnectionState.Closed
+					conexion.Open()
+				End If
+				comando.Connection = conexion
+				reader = comando.ExecuteReader
+				While reader.Read
+					coleccion.Add(zCrearUnoDelReader(reader))
+                End While
+                Return coleccion
+			Finally
+				If reader isNOT Nothing AndAlso Not reader.IsClosed Then
+   					reader.Close()
+  				End If
+                If conexion IsNot Nothing AndAlso estadoInicialConexion = ConnectionState.Closed AndAlso conexion.State = ConnectionState.Open Then
+                    conexion.Close()
+                End If
+            End Try
+        End Function 
+
+
+		''' <summary>
+		''' Elimina FISICAMENTE un registro de la tabla <%NombreTabla%> localizandolo por su clave primaria <%NombreClavePrimaria%>
+		''' </summary>
+		''' <remarks></remarks>
+        Public Shared Function zEliminarFisicoPorId(ByVal id As Int32, iIdRefCampo as int32, _
+													Optional ByVal conexion As SqlConnection = Nothing, _
+													Optional ByVal transaccion As SqlTransaction = Nothing) As Integer
+            Dim SQL As String = ""
+            Dim comando As SqlCommand
+            Dim contador As Integer
+			Dim estadoInicialConexion As ConnectionState
+            SQL = "DELETE <%NombreTabla%> WHERE (<%NombreClavePrimaria%> = @<%NombreClavePrimaria%>);"
+            Try
+                comando = New SqlCommand
+				comando.CommandText = SQL
+                comando.CommandType = CommandType.Text
+                comando.Transaction = transaccion
+                comando.Parameters.AddWithValue("@<%NombreClavePrimaria%>", id)
+				if conexion IsNot Nothing Then
+					estadoInicialConexion = conexion.State
+				Else
+					conexion = New SqlConnection()
+                	conexion.ConnectionString = DAL.ConectDal.DevolverCadenaConexion(iIdRefCampo)
+                	estadoInicialConexion = ConnectionState.Closed
+                	conexion.Open()
+				End If
+				comando.Connection= conexion
+                contador = comando.ExecuteNonQuery()
+                Return contador
+           Finally
+                If conexion IsNot Nothing AndAlso estadoInicialConexion = ConnectionState.Closed AndAlso conexion.State <> ConnectionState.Closed Then
+                    conexion.Close()
+                End If               
+            End Try
+        End Function		
+		
+		''' <summary>
+		''' Devuelve una coleccion de objetos <%NombreClase%> basado en los parámetros que vengan conformados
+		''' en el objeto de entrada MGW.<%NombreTablaSinPrefijo%>.<%NombreClase%>Filtro
+		''' </summary>
+		''' <remarks></remarks>
+		Public Shared Function zDevolverColeccionBusqueda(ByVal filtro As MGW.<%NombreTablaSinPrefijo%>.<%NombreClase%>Filtro, _
+															iIdRefCampo as int32, Optional ByVal conexion As SqlConnection= Nothing, _
+															Optional ByVal transaccion As SqlTransaction = Nothing) As MGW.<%NombreTablaSinPrefijo%>.<%NombreClase%>Coleccion
+			Dim sql As String = ""
+			Dim comando As SqlCommand
+			Dim reader As SqlDataReader = Nothing
+			Dim coleccion As MGW.<%NombreTablaSinPrefijo%>.<%NombreTablaSinPrefijo%>Coleccion
+			Dim item As MGW.<%NombreTablaSinPrefijo%>.<%NombreClase%>
+			Dim estadoInicialConexion As ConnectionState
+			sql ="SELECT <%ListaNombreColumnas%> " & _
+				"FROM <%NombreTabla%> WHERE 1 = 1 "
+			
+			<%fe Columnas%>If Not String.IsNullOrEmpty(filtro.<%NombreColumna%>.ToString()) Then
+				sql += " AND <%NombreColumna%> = @<%NombreColumna%>"
+			End If
+			<%/fe Columnas%>
+			Try
+				coleccion = New MGW.<%NombreTablaSinPrefijo%>.<%NombreTablaSinPrefijo%>Coleccion()
+				item = New MGW.<%NombreTablaSinPrefijo%>.<%NombreClase%>()
+				comando = New SqlCommand
+				comando.commandtext = sql
+				comando.CommandType = CommandType.Text
+				comando.Transaction = transaccion
+
+				<%fe Columnas%>If Not String.IsNullOrEmpty(filtro.<%NombreColumna%>.ToString()) Then
+					comando.Parameters.AddWithValue("@<%NombreColumna%>", filtro.<%NombreColumna%>)
+				End If
+				<%/fe Columnas%>
+				If conexion IsNot Nothing Then
+					estadoInicialConexion = conexion.State
+				Else
+					conexion = New SqlConnection()
+					conexion.ConnectionString = DAL.ConectDal.DevolverCadenaConexion(iIdRefCampo)
+					estadoInicialConexion = ConnectionState.Closed
+					conexion.Open()
+				End If
+				comando.connection = conexion
+				reader = comando.ExecuteReader
+				While reader.Read
+					coleccion.Add(zCrearUnoDelReader(reader))
+				End While
+				Return coleccion
+			Finally
+				If reader IsNot Nothing AndAlso Not reader.IsClosed Then
+					reader.Close()
+				End If
+				If conexion IsNot Nothing AndAlso estadoInicialConexion = ConnectionState.Closed AndAlso conexion.State = ConnectionState.Open Then
+					conexion.Close()
+				End If
+			End Try
+		End Function
+
+	End Class
+End Namespace

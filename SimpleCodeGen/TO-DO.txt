@@ -1,0 +1,3 @@
+﻿** Revisar TemplateContent para quitar la mierda específica de GolfSpain y hacerla más genérica
+** Revisar las templates VB para eliminar chorradas heredadas y hacerla una capa de datos en condiciones
+** Crear las templates en C#
