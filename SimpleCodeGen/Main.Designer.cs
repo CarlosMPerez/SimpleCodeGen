@@ -30,142 +30,193 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Main));
-            this.tvTablas = new System.Windows.Forms.TreeView();
+            this.tvDBView = new System.Windows.Forms.TreeView();
             this.imgLista = new System.Windows.Forms.ImageList(this.components);
-            this.lblTablas = new System.Windows.Forms.Label();
-            this.lblPlantilla = new System.Windows.Forms.Label();
-            this.lstPlantillas = new System.Windows.Forms.ListView();
-            this.lblDestino = new System.Windows.Forms.Label();
-            this.txtRutaCodigoGen = new System.Windows.Forms.TextBox();
-            this.btnRutaCodigoGen = new System.Windows.Forms.Button();
+            this.lblDBView = new System.Windows.Forms.Label();
+            this.lblTemplates = new System.Windows.Forms.Label();
+            this.lstTemplates = new System.Windows.Forms.ListView();
+            this.lblOutputPath = new System.Windows.Forms.Label();
+            this.txtOutputPath = new System.Windows.Forms.TextBox();
+            this.btnOutputPath = new System.Windows.Forms.Button();
             this.btnGenerateCode = new System.Windows.Forms.Button();
-            this.dlgRutaCodigo = new System.Windows.Forms.FolderBrowserDialog();
-            this.txtResultados = new System.Windows.Forms.TextBox();
+            this.dlgOutputPath = new System.Windows.Forms.FolderBrowserDialog();
+            this.txtResults = new System.Windows.Forms.TextBox();
+            this.lblConnectionString = new System.Windows.Forms.Label();
+            this.cmbConnString = new System.Windows.Forms.ComboBox();
+            this.btnSaveConnString = new System.Windows.Forms.Button();
+            this.btnConnect = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
-            // tvTablas
+            // tvDBView
             // 
-            this.tvTablas.CheckBoxes = true;
-            this.tvTablas.Font = new System.Drawing.Font("Verdana", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.tvTablas.ImageIndex = 0;
-            this.tvTablas.ImageList = this.imgLista;
-            this.tvTablas.Location = new System.Drawing.Point(14, 42);
-            this.tvTablas.Name = "tvTablas";
-            this.tvTablas.SelectedImageIndex = 0;
-            this.tvTablas.Size = new System.Drawing.Size(391, 498);
-            this.tvTablas.TabIndex = 0;
-            this.tvTablas.AfterCheck += new System.Windows.Forms.TreeViewEventHandler(this.tvTablas_AfterCheck);
+            this.tvDBView.CheckBoxes = true;
+            this.tvDBView.Font = new System.Drawing.Font("Verdana", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.tvDBView.ImageIndex = 0;
+            this.tvDBView.ImageList = this.imgLista;
+            this.tvDBView.Location = new System.Drawing.Point(14, 128);
+            this.tvDBView.Name = "tvDBView";
+            this.tvDBView.SelectedImageIndex = 0;
+            this.tvDBView.Size = new System.Drawing.Size(477, 460);
+            this.tvDBView.TabIndex = 0;
+            this.tvDBView.AfterCheck += new System.Windows.Forms.TreeViewEventHandler(this.tvDBView_AfterCheck);
             // 
             // imgLista
             // 
             this.imgLista.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imgLista.ImageStream")));
             this.imgLista.TransparentColor = System.Drawing.Color.Transparent;
-            this.imgLista.Images.SetKeyName(0, "bdd.png");
-            this.imgLista.Images.SetKeyName(1, "table.png");
+            this.imgLista.Images.SetKeyName(0, "database-512.png");
+            this.imgLista.Images.SetKeyName(1, "img_426719.png");
+            this.imgLista.Images.SetKeyName(2, "iconfinder_save_2639912.png");
+            this.imgLista.Images.SetKeyName(3, "iconfinder_database_run_103471.png");
             // 
-            // lblTablas
+            // lblDBView
             // 
-            this.lblTablas.AutoSize = true;
-            this.lblTablas.Font = new System.Drawing.Font("Verdana", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblTablas.Location = new System.Drawing.Point(11, 9);
-            this.lblTablas.Name = "lblTablas";
-            this.lblTablas.Size = new System.Drawing.Size(394, 17);
-            this.lblTablas.TabIndex = 1;
-            this.lblTablas.Text = "1.- Selecciona la(s) tabla(s) para generar código:";
+            this.lblDBView.AutoSize = true;
+            this.lblDBView.Font = new System.Drawing.Font("Verdana", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblDBView.Location = new System.Drawing.Point(12, 105);
+            this.lblDBView.Name = "lblDBView";
+            this.lblDBView.Size = new System.Drawing.Size(424, 20);
+            this.lblDBView.TabIndex = 1;
+            this.lblDBView.Text = "2.- Pick the table(s) to generate code from:";
             // 
-            // lblPlantilla
+            // lblTemplates
             // 
-            this.lblPlantilla.AutoSize = true;
-            this.lblPlantilla.Font = new System.Drawing.Font("Verdana", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblPlantilla.Location = new System.Drawing.Point(428, 9);
-            this.lblPlantilla.Name = "lblPlantilla";
-            this.lblPlantilla.Size = new System.Drawing.Size(276, 17);
-            this.lblPlantilla.TabIndex = 2;
-            this.lblPlantilla.Text = "2.- Selecciona la plantilla a utilizar:";
+            this.lblTemplates.AutoSize = true;
+            this.lblTemplates.Font = new System.Drawing.Font("Verdana", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblTemplates.Location = new System.Drawing.Point(506, 105);
+            this.lblTemplates.Name = "lblTemplates";
+            this.lblTemplates.Size = new System.Drawing.Size(308, 20);
+            this.lblTemplates.TabIndex = 2;
+            this.lblTemplates.Text = "3.- Pick the template(s) to use:";
             // 
-            // lstPlantillas
+            // lstTemplates
             // 
-            this.lstPlantillas.CheckBoxes = true;
-            this.lstPlantillas.Font = new System.Drawing.Font("Verdana", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lstPlantillas.FullRowSelect = true;
-            this.lstPlantillas.GridLines = true;
-            this.lstPlantillas.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
-            this.lstPlantillas.HideSelection = false;
-            this.lstPlantillas.Location = new System.Drawing.Point(424, 45);
-            this.lstPlantillas.Name = "lstPlantillas";
-            this.lstPlantillas.Size = new System.Drawing.Size(421, 189);
-            this.lstPlantillas.TabIndex = 3;
-            this.lstPlantillas.UseCompatibleStateImageBehavior = false;
-            this.lstPlantillas.View = System.Windows.Forms.View.List;
+            this.lstTemplates.CheckBoxes = true;
+            this.lstTemplates.Font = new System.Drawing.Font("Verdana", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lstTemplates.FullRowSelect = true;
+            this.lstTemplates.GridLines = true;
+            this.lstTemplates.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
+            this.lstTemplates.HideSelection = false;
+            this.lstTemplates.Location = new System.Drawing.Point(510, 128);
+            this.lstTemplates.Name = "lstTemplates";
+            this.lstTemplates.Size = new System.Drawing.Size(471, 192);
+            this.lstTemplates.TabIndex = 3;
+            this.lstTemplates.UseCompatibleStateImageBehavior = false;
+            this.lstTemplates.View = System.Windows.Forms.View.List;
             // 
-            // lblDestino
+            // lblOutputPath
             // 
-            this.lblDestino.AutoSize = true;
-            this.lblDestino.Font = new System.Drawing.Font("Verdana", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblDestino.Location = new System.Drawing.Point(428, 253);
-            this.lblDestino.Name = "lblDestino";
-            this.lblDestino.Size = new System.Drawing.Size(341, 17);
-            this.lblDestino.TabIndex = 4;
-            this.lblDestino.Text = "3.- Selecciona la ruta del código generado:";
+            this.lblOutputPath.AutoSize = true;
+            this.lblOutputPath.Font = new System.Drawing.Font("Verdana", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblOutputPath.Location = new System.Drawing.Point(516, 352);
+            this.lblOutputPath.Name = "lblOutputPath";
+            this.lblOutputPath.Size = new System.Drawing.Size(426, 20);
+            this.lblOutputPath.TabIndex = 4;
+            this.lblOutputPath.Text = "4.- Choose the path for the generated code:";
             // 
-            // txtRutaCodigoGen
+            // txtOutputPath
             // 
-            this.txtRutaCodigoGen.Location = new System.Drawing.Point(424, 273);
-            this.txtRutaCodigoGen.Name = "txtRutaCodigoGen";
-            this.txtRutaCodigoGen.Size = new System.Drawing.Size(378, 20);
-            this.txtRutaCodigoGen.TabIndex = 5;
+            this.txtOutputPath.Location = new System.Drawing.Point(520, 386);
+            this.txtOutputPath.Name = "txtOutputPath";
+            this.txtOutputPath.Size = new System.Drawing.Size(428, 24);
+            this.txtOutputPath.TabIndex = 5;
             // 
-            // btnRutaCodigoGen
+            // btnOutputPath
             // 
-            this.btnRutaCodigoGen.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnRutaCodigoGen.Font = new System.Drawing.Font("Verdana", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnRutaCodigoGen.Location = new System.Drawing.Point(808, 271);
-            this.btnRutaCodigoGen.Name = "btnRutaCodigoGen";
-            this.btnRutaCodigoGen.Size = new System.Drawing.Size(37, 23);
-            this.btnRutaCodigoGen.TabIndex = 6;
-            this.btnRutaCodigoGen.Text = "...";
-            this.btnRutaCodigoGen.UseVisualStyleBackColor = true;
-            this.btnRutaCodigoGen.Click += new System.EventHandler(this.btnRutaCodigoGen_Click);
+            this.btnOutputPath.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnOutputPath.Font = new System.Drawing.Font("Verdana", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnOutputPath.Location = new System.Drawing.Point(954, 384);
+            this.btnOutputPath.Name = "btnOutputPath";
+            this.btnOutputPath.Size = new System.Drawing.Size(37, 26);
+            this.btnOutputPath.TabIndex = 6;
+            this.btnOutputPath.Text = "...";
+            this.btnOutputPath.UseVisualStyleBackColor = true;
+            this.btnOutputPath.Click += new System.EventHandler(this.btnOutputPath_Click);
             // 
             // btnGenerateCode
             // 
-            this.btnGenerateCode.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnGenerateCode.Font = new System.Drawing.Font("Verdana", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnGenerateCode.Location = new System.Drawing.Point(529, 299);
+            this.btnGenerateCode.Location = new System.Drawing.Point(600, 416);
             this.btnGenerateCode.Name = "btnGenerateCode";
-            this.btnGenerateCode.Size = new System.Drawing.Size(175, 35);
+            this.btnGenerateCode.Size = new System.Drawing.Size(273, 38);
             this.btnGenerateCode.TabIndex = 7;
-            this.btnGenerateCode.Text = "Generar Código";
+            this.btnGenerateCode.Text = "Generate Code";
             this.btnGenerateCode.UseVisualStyleBackColor = true;
             this.btnGenerateCode.Click += new System.EventHandler(this.btnGenerateCode_Click);
             // 
-            // dlgRutaCodigo
+            // dlgOutputPath
             // 
-            this.dlgRutaCodigo.RootFolder = System.Environment.SpecialFolder.MyComputer;
+            this.dlgOutputPath.RootFolder = System.Environment.SpecialFolder.MyComputer;
             // 
-            // txtResultados
+            // txtResults
             // 
-            this.txtResultados.Location = new System.Drawing.Point(424, 356);
-            this.txtResultados.Multiline = true;
-            this.txtResultados.Name = "txtResultados";
-            this.txtResultados.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtResultados.Size = new System.Drawing.Size(421, 184);
-            this.txtResultados.TabIndex = 9;
+            this.txtResults.Location = new System.Drawing.Point(520, 468);
+            this.txtResults.Multiline = true;
+            this.txtResults.Name = "txtResults";
+            this.txtResults.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.txtResults.Size = new System.Drawing.Size(471, 120);
+            this.txtResults.TabIndex = 9;
+            // 
+            // lblConnectionString
+            // 
+            this.lblConnectionString.AutoSize = true;
+            this.lblConnectionString.Font = new System.Drawing.Font("Verdana", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblConnectionString.Location = new System.Drawing.Point(12, 19);
+            this.lblConnectionString.Name = "lblConnectionString";
+            this.lblConnectionString.Size = new System.Drawing.Size(408, 20);
+            this.lblConnectionString.TabIndex = 10;
+            this.lblConnectionString.Text = "1.- Enter or choose the connection string:";
+            // 
+            // cmbConnString
+            // 
+            this.cmbConnString.FormattingEnabled = true;
+            this.cmbConnString.Location = new System.Drawing.Point(16, 47);
+            this.cmbConnString.Name = "cmbConnString";
+            this.cmbConnString.Size = new System.Drawing.Size(836, 24);
+            this.cmbConnString.TabIndex = 11;
+            // 
+            // btnSaveConnString
+            // 
+            this.btnSaveConnString.Font = new System.Drawing.Font("Verdana", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnSaveConnString.ImageIndex = 2;
+            this.btnSaveConnString.ImageList = this.imgLista;
+            this.btnSaveConnString.Location = new System.Drawing.Point(865, 31);
+            this.btnSaveConnString.Name = "btnSaveConnString";
+            this.btnSaveConnString.Size = new System.Drawing.Size(55, 50);
+            this.btnSaveConnString.TabIndex = 12;
+            this.btnSaveConnString.UseVisualStyleBackColor = true;
+            this.btnSaveConnString.Click += new System.EventHandler(this.btnSaveConnString_Click);
+            // 
+            // btnConnect
+            // 
+            this.btnConnect.Font = new System.Drawing.Font("Verdana", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnConnect.ImageIndex = 3;
+            this.btnConnect.ImageList = this.imgLista;
+            this.btnConnect.Location = new System.Drawing.Point(926, 31);
+            this.btnConnect.Name = "btnConnect";
+            this.btnConnect.Size = new System.Drawing.Size(55, 50);
+            this.btnConnect.TabIndex = 13;
+            this.btnConnect.UseVisualStyleBackColor = true;
+            this.btnConnect.Click += new System.EventHandler(this.btnConnect_Click);
             // 
             // Main
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(857, 572);
-            this.Controls.Add(this.txtResultados);
+            this.ClientSize = new System.Drawing.Size(1003, 641);
+            this.Controls.Add(this.btnConnect);
+            this.Controls.Add(this.btnSaveConnString);
+            this.Controls.Add(this.cmbConnString);
+            this.Controls.Add(this.lblConnectionString);
+            this.Controls.Add(this.txtResults);
             this.Controls.Add(this.btnGenerateCode);
-            this.Controls.Add(this.btnRutaCodigoGen);
-            this.Controls.Add(this.txtRutaCodigoGen);
-            this.Controls.Add(this.lblDestino);
-            this.Controls.Add(this.lstPlantillas);
-            this.Controls.Add(this.lblPlantilla);
-            this.Controls.Add(this.lblTablas);
-            this.Controls.Add(this.tvTablas);
+            this.Controls.Add(this.btnOutputPath);
+            this.Controls.Add(this.txtOutputPath);
+            this.Controls.Add(this.lblOutputPath);
+            this.Controls.Add(this.lstTemplates);
+            this.Controls.Add(this.lblTemplates);
+            this.Controls.Add(this.lblDBView);
+            this.Controls.Add(this.tvDBView);
             this.Font = new System.Drawing.Font("Verdana", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
@@ -180,17 +231,21 @@
 
         #endregion
 
-        private System.Windows.Forms.TreeView tvTablas;
-        private System.Windows.Forms.Label lblTablas;
-        private System.Windows.Forms.Label lblPlantilla;
-        private System.Windows.Forms.ListView lstPlantillas;
-        private System.Windows.Forms.Label lblDestino;
-        private System.Windows.Forms.TextBox txtRutaCodigoGen;
-        private System.Windows.Forms.Button btnRutaCodigoGen;
+        private System.Windows.Forms.TreeView tvDBView;
+        private System.Windows.Forms.Label lblDBView;
+        private System.Windows.Forms.Label lblTemplates;
+        private System.Windows.Forms.ListView lstTemplates;
+        private System.Windows.Forms.Label lblOutputPath;
+        private System.Windows.Forms.TextBox txtOutputPath;
+        private System.Windows.Forms.Button btnOutputPath;
         private System.Windows.Forms.Button btnGenerateCode;
-        private System.Windows.Forms.FolderBrowserDialog dlgRutaCodigo;
+        private System.Windows.Forms.FolderBrowserDialog dlgOutputPath;
         private System.Windows.Forms.ImageList imgLista;
-        private System.Windows.Forms.TextBox txtResultados;
+        private System.Windows.Forms.TextBox txtResults;
+        private System.Windows.Forms.Label lblConnectionString;
+        private System.Windows.Forms.ComboBox cmbConnString;
+        private System.Windows.Forms.Button btnSaveConnString;
+        private System.Windows.Forms.Button btnConnect;
     }
 }
 

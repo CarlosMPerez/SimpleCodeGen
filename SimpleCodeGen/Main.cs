@@ -1,12 +1,17 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Configuration;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace SimpleCodeGen
 {
     public partial class Main : Form
     {
+        private DBEngine dbEngine;
+        private TemplateEngine templateEngine;
+        private List<string> connStrings;
         public Main()
         {
             InitializeComponent();
@@ -14,9 +19,51 @@ namespace SimpleCodeGen
 
         private void Main_Load(object sender, EventArgs e)
         {
-            LoadTreeView();
+            LoadConnStrings();
             LoadTemplates();
             LoadDefaultGenPath();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private void LoadConnStrings()
+        {
+            connStrings = new List<string>();
+            // Read all the keys from the config file
+            var configFile = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+            var conns = configFile.AppSettings.Settings.AllKeys
+                            .Where(key => key.StartsWith("conn"))
+                            .Select(key => ConfigurationManager.AppSettings[key])
+                            .ToArray();
+            foreach (string conn in conns)
+            {
+                cmbConnString.Items.Add(conn);
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connString"></param>
+        private void UpdateConnStrings(string connString)
+        {
+            // Read all the keys from the config file
+            var configFile = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+            string[] conns = configFile.AppSettings.Settings.AllKeys
+                            .Where(key => key.StartsWith("conn"))
+                            .Select(key => ConfigurationManager.AppSettings[key])
+                            .ToArray();
+
+            // Check if connString is already in collection
+            if (conns.FirstOrDefault(x => x == cmbConnString.Text) == null)
+            {
+                string key = String.Format("conn{0}", conns.Count() + 1);
+                configFile.AppSettings.Settings.Add(key, cmbConnString.Text);
+                cmbConnString.Items.Add(cmbConnString.Text);
+                configFile.Save(ConfigurationSaveMode.Modified);
+                ConfigurationManager.RefreshSection(configFile.AppSettings.SectionInformation.Name);
+            }
         }
 
         /// <summary>
@@ -24,15 +71,15 @@ namespace SimpleCodeGen
         /// </summary>
         private void LoadTreeView()
         {
-            foreach (string dbName in DBEngine.GetDatabases())
+            foreach (string dbName in dbEngine.GetDatabases())
             {
                 TreeNode parentNode = new TreeNode(dbName, 0, 0);
-                foreach (string tableName in DBEngine.GetTables(dbName))
+                foreach (string tableName in dbEngine.GetTables(dbName))
                 {
                     TreeNode childNode = new TreeNode(tableName, 1, 1);
                     parentNode.Nodes.Add(childNode);
                 }
-                tvTablas.Nodes.Add(parentNode);
+                tvDBView.Nodes.Add(parentNode);
             }
         }
 
@@ -43,13 +90,13 @@ namespace SimpleCodeGen
         {
             foreach (string fichero in Directory.EnumerateFiles("templates", "*.template.scg"))
             {
-                lstPlantillas.Items.Add(Path.GetFileNameWithoutExtension(fichero));
+                lstTemplates.Items.Add(Path.GetFileNameWithoutExtension(fichero));
             }
         }
 
         private void LoadDefaultGenPath()
         {
-            txtRutaCodigoGen.Text = AppContext.BaseDirectory.ToString();
+            txtOutputPath.Text = AppContext.BaseDirectory.ToString();
         }
 
         /// <summary>
@@ -57,12 +104,12 @@ namespace SimpleCodeGen
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void btnRutaCodigoGen_Click(object sender, EventArgs e)
+        private void btnOutputPath_Click(object sender, EventArgs e)
         {
-            dlgRutaCodigo.SelectedPath = txtRutaCodigoGen.Text;
-            if (dlgRutaCodigo.ShowDialog() == DialogResult.OK)
+            dlgOutputPath.SelectedPath = txtOutputPath.Text;
+            if (dlgOutputPath.ShowDialog() == DialogResult.OK)
             {
-                txtRutaCodigoGen.Text = dlgRutaCodigo.SelectedPath;
+                txtOutputPath.Text = dlgOutputPath.SelectedPath;
             }
         }
 
@@ -78,12 +125,12 @@ namespace SimpleCodeGen
                 Application.UseWaitCursor = true;
                 List<Tuple<string, string>> tablasAProcesar = new List<Tuple<string, string>>();
                 // Bloqueamos los controles mientras se procesa la cosa
-                tvTablas.Enabled = false;
-                lstPlantillas.Enabled = false;
+                tvDBView.Enabled = false;
+                lstTemplates.Enabled = false;
                 btnGenerateCode.Enabled = false;
 
                 // Vamos a ver qué tablas queremos procesar
-                foreach (TreeNode parent in tvTablas.Nodes)
+                foreach (TreeNode parent in tvDBView.Nodes)
                 {
                     if (parent.Nodes.Count > 0)
                     {
@@ -99,7 +146,7 @@ namespace SimpleCodeGen
 
                 foreach (Tuple<string, string> tupla in tablasAProcesar)
                 {
-                    foreach (ListViewItem item in lstPlantillas.Items)
+                    foreach (ListViewItem item in lstTemplates.Items)
                     {
                         if (item.Checked)
                         {
@@ -107,26 +154,26 @@ namespace SimpleCodeGen
                             string tName = tupla.Item2;
                             if (tName.Substring(3, 1) == "_") tName = tName.Substring(4);
 
-                            txtResultados.AppendText(String.Format("Creando {0}{1}.generado.vb ... ", tName, item.Text));
+                            txtResults.AppendText(String.Format("Creando {0}{1}.generado.vb ... ", tName, item.Text));
 
-                            TemplateEngine.Generate(tupla.Item1, tupla.Item2,
-                                Path.Combine(txtRutaCodigoGen.Text, String.Format("{0}{1}.generado.vb", tName, item.Text)),
+                            templateEngine.Generate(tupla.Item1, tupla.Item2,
+                                Path.Combine(txtOutputPath.Text, String.Format("{0}{1}.generado.vb", tName, item.Text)),
                                 String.Format(@"templates\{0}.scg", item.Text));
 
-                            txtResultados.AppendText("OK" + Environment.NewLine);
+                            txtResults.AppendText("OK" + Environment.NewLine);
                         }
                         Application.DoEvents();
                     }
                 }
-                txtResultados.AppendText("Proceso Terminado." + Environment.NewLine);
+                txtResults.AppendText("Proceso Terminado." + Environment.NewLine);
                 Application.UseWaitCursor = false;
             }
 
 
 
             // Desbloqueamos los controles al terminar
-            tvTablas.Enabled = true;
-            lstPlantillas.Enabled = true;
+            tvDBView.Enabled = true;
+            lstTemplates.Enabled = true;
             btnGenerateCode.Enabled = true;
         }
 
@@ -137,7 +184,7 @@ namespace SimpleCodeGen
         private bool ValidateControls()
         {
             bool someNodeIsChecked = false;
-            foreach (TreeNode parent in tvTablas.Nodes)
+            foreach (TreeNode parent in tvDBView.Nodes)
             {
                 if (parent.Checked)
                 {
@@ -159,7 +206,7 @@ namespace SimpleCodeGen
             }
 
             bool someTemplateIsChecked = false;
-            foreach (ListViewItem item in lstPlantillas.Items)
+            foreach (ListViewItem item in lstTemplates.Items)
             {
                 if (item.Checked)
                 {
@@ -169,9 +216,9 @@ namespace SimpleCodeGen
             }
 
             bool pathIsSet = false;
-            if (txtRutaCodigoGen.Text != "")
+            if (txtOutputPath.Text != "")
             {
-                if (Directory.Exists(txtRutaCodigoGen.Text))
+                if (Directory.Exists(txtOutputPath.Text))
                 {
                     pathIsSet = true;
                 }
@@ -208,7 +255,7 @@ namespace SimpleCodeGen
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void tvTablas_AfterCheck(object sender, TreeViewEventArgs e)
+        private void tvDBView_AfterCheck(object sender, TreeViewEventArgs e)
         {
             TreeNode parent = e.Node;
             if (parent.Nodes.Count > 0) //es nodo padre
@@ -219,6 +266,31 @@ namespace SimpleCodeGen
                 {
                     node.Checked = parent.Checked;
                 }
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnSaveConnString_Click(object sender, EventArgs e)
+        {
+            UpdateConnStrings(cmbConnString.Text);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnConnect_Click(object sender, EventArgs e)
+        {
+            if (cmbConnString.Text != "")
+            {
+                dbEngine = new DBEngine(cmbConnString.Text);
+                templateEngine = new TemplateEngine(dbEngine);
+                LoadTreeView();
             }
         }
     }

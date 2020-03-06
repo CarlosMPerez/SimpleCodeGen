@@ -1,3 +1,6 @@
 ﻿** Revisar TemplateContent para quitar la mierda específica de GolfSpain y hacerla más genérica
 ** Revisar las templates VB para eliminar chorradas heredadas y hacerla una capa de datos en condiciones
 ** Crear las templates en C#
+** Interceptar error si user intenta crear una cadena de conexión "PACO"
+** Refactorizar DBEngine a interfaz para diferentes orígenes de datos
+** ¿Usarlo como base para el generador de datos de prueba?
