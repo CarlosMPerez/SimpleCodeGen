@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using System.Configuration;
 
-namespace SimpleCodeGen
+namespace SimpleCodeGen.CodeGenerator
 {
     public class DBEngine
     {
@@ -15,6 +14,10 @@ namespace SimpleCodeGen
             _connString = strConn;
         }
 
+        /// <summary>
+        /// Returns a list of all Databases in the connection
+        /// </summary>
+        /// <returns>List of databases</returns>
         public List<string> GetDatabases()
         {
             List<string> resp = new List<string>();
@@ -38,6 +41,11 @@ namespace SimpleCodeGen
             return resp;
         }
 
+        /// <summary>
+        /// Gets a list of all tables of a given database
+        /// </summary>
+        /// <param name="databaseName">The database name</param>
+        /// <returns>List of tables</returns>
         public List<string> GetTables(string databaseName)
         {
             List<string> resp = new List<string>();
@@ -63,7 +71,13 @@ namespace SimpleCodeGen
             return resp;
         }
 
-        public Dictionary<string, string> GetColumnsWithCSharpTypes(string db, string table)
+        /// <summary>
+        /// Gets all the columns of a database.table with its corresponding C# type
+        /// </summary>
+        /// <param name="db">The database</param>
+        /// <param name="table">The table</param>
+        /// <returns>A dictionary with the column name and its type</returns>
+        public Dictionary<string, string> GetColumnsWithDataTypes(string db, string table)
         {
             Dictionary<string, string> resp = new Dictionary<string, string>();
 
@@ -88,6 +102,12 @@ namespace SimpleCodeGen
             return resp;
         }
 
+        /// <summary>
+        /// Gets the name of the primary key column of a table
+        /// </summary>
+        /// <param name="db">the database</param>
+        /// <param name="table">the table</param>
+        /// <returns>the name of the primary key column</returns>
         public string GetPrimaryKeyColumn(string db, string table)
         {
             string resp = "";

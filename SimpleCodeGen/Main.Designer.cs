@@ -34,7 +34,6 @@
             this.imgLista = new System.Windows.Forms.ImageList(this.components);
             this.lblDBView = new System.Windows.Forms.Label();
             this.lblTemplates = new System.Windows.Forms.Label();
-            this.lstTemplates = new System.Windows.Forms.ListView();
             this.lblOutputPath = new System.Windows.Forms.Label();
             this.txtOutputPath = new System.Windows.Forms.TextBox();
             this.btnOutputPath = new System.Windows.Forms.Button();
@@ -45,6 +44,10 @@
             this.cmbConnString = new System.Windows.Forms.ComboBox();
             this.btnSaveConnString = new System.Windows.Forms.Button();
             this.btnConnect = new System.Windows.Forms.Button();
+            this.Tip = new System.Windows.Forms.ToolTip(this.components);
+            this.tvTemplates = new System.Windows.Forms.TreeView();
+            this.chkRemovePrefix = new System.Windows.Forms.CheckBox();
+            this.txtPrefix = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // tvDBView
@@ -56,9 +59,9 @@
             this.tvDBView.Location = new System.Drawing.Point(14, 128);
             this.tvDBView.Name = "tvDBView";
             this.tvDBView.SelectedImageIndex = 0;
-            this.tvDBView.Size = new System.Drawing.Size(477, 460);
+            this.tvDBView.Size = new System.Drawing.Size(477, 431);
             this.tvDBView.TabIndex = 0;
-            this.tvDBView.AfterCheck += new System.Windows.Forms.TreeViewEventHandler(this.tvDBView_AfterCheck);
+            this.tvDBView.AfterCheck += new System.Windows.Forms.TreeViewEventHandler(this.TreeViewAfterCheck);
             // 
             // imgLista
             // 
@@ -68,6 +71,8 @@
             this.imgLista.Images.SetKeyName(1, "img_426719.png");
             this.imgLista.Images.SetKeyName(2, "iconfinder_save_2639912.png");
             this.imgLista.Images.SetKeyName(3, "iconfinder_database_run_103471.png");
+            this.imgLista.Images.SetKeyName(4, "iconfinder_icon-folder_211608.png");
+            this.imgLista.Images.SetKeyName(5, "iconfinder_file_227587.png");
             // 
             // lblDBView
             // 
@@ -88,21 +93,6 @@
             this.lblTemplates.Size = new System.Drawing.Size(308, 20);
             this.lblTemplates.TabIndex = 2;
             this.lblTemplates.Text = "3.- Pick the template(s) to use:";
-            // 
-            // lstTemplates
-            // 
-            this.lstTemplates.CheckBoxes = true;
-            this.lstTemplates.Font = new System.Drawing.Font("Verdana", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lstTemplates.FullRowSelect = true;
-            this.lstTemplates.GridLines = true;
-            this.lstTemplates.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
-            this.lstTemplates.HideSelection = false;
-            this.lstTemplates.Location = new System.Drawing.Point(510, 128);
-            this.lstTemplates.Name = "lstTemplates";
-            this.lstTemplates.Size = new System.Drawing.Size(471, 192);
-            this.lstTemplates.TabIndex = 3;
-            this.lstTemplates.UseCompatibleStateImageBehavior = false;
-            this.lstTemplates.View = System.Windows.Forms.View.List;
             // 
             // lblOutputPath
             // 
@@ -130,6 +120,7 @@
             this.btnOutputPath.Size = new System.Drawing.Size(37, 26);
             this.btnOutputPath.TabIndex = 6;
             this.btnOutputPath.Text = "...";
+            this.Tip.SetToolTip(this.btnOutputPath, "Choose Path");
             this.btnOutputPath.UseVisualStyleBackColor = true;
             this.btnOutputPath.Click += new System.EventHandler(this.btnOutputPath_Click);
             // 
@@ -141,6 +132,7 @@
             this.btnGenerateCode.Size = new System.Drawing.Size(273, 38);
             this.btnGenerateCode.TabIndex = 7;
             this.btnGenerateCode.Text = "Generate Code";
+            this.Tip.SetToolTip(this.btnGenerateCode, "Generates code");
             this.btnGenerateCode.UseVisualStyleBackColor = true;
             this.btnGenerateCode.Click += new System.EventHandler(this.btnGenerateCode_Click);
             // 
@@ -154,7 +146,7 @@
             this.txtResults.Multiline = true;
             this.txtResults.Name = "txtResults";
             this.txtResults.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtResults.Size = new System.Drawing.Size(471, 120);
+            this.txtResults.Size = new System.Drawing.Size(471, 161);
             this.txtResults.TabIndex = 9;
             // 
             // lblConnectionString
@@ -184,6 +176,7 @@
             this.btnSaveConnString.Name = "btnSaveConnString";
             this.btnSaveConnString.Size = new System.Drawing.Size(55, 50);
             this.btnSaveConnString.TabIndex = 12;
+            this.Tip.SetToolTip(this.btnSaveConnString, "Save Connection String");
             this.btnSaveConnString.UseVisualStyleBackColor = true;
             this.btnSaveConnString.Click += new System.EventHandler(this.btnSaveConnString_Click);
             // 
@@ -196,14 +189,50 @@
             this.btnConnect.Name = "btnConnect";
             this.btnConnect.Size = new System.Drawing.Size(55, 50);
             this.btnConnect.TabIndex = 13;
+            this.Tip.SetToolTip(this.btnConnect, "Open connection");
             this.btnConnect.UseVisualStyleBackColor = true;
             this.btnConnect.Click += new System.EventHandler(this.btnConnect_Click);
+            // 
+            // tvTemplates
+            // 
+            this.tvTemplates.CheckBoxes = true;
+            this.tvTemplates.Font = new System.Drawing.Font("Verdana", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.tvTemplates.ImageIndex = 0;
+            this.tvTemplates.ImageList = this.imgLista;
+            this.tvTemplates.Location = new System.Drawing.Point(524, 128);
+            this.tvTemplates.Name = "tvTemplates";
+            this.tvTemplates.SelectedImageIndex = 0;
+            this.tvTemplates.Size = new System.Drawing.Size(467, 221);
+            this.tvTemplates.TabIndex = 14;
+            this.tvTemplates.AfterCheck += new System.Windows.Forms.TreeViewEventHandler(this.TreeViewAfterCheck);
+            // 
+            // chkRemovePrefix
+            // 
+            this.chkRemovePrefix.AutoSize = true;
+            this.chkRemovePrefix.Location = new System.Drawing.Point(13, 566);
+            this.chkRemovePrefix.Name = "chkRemovePrefix";
+            this.chkRemovePrefix.Size = new System.Drawing.Size(221, 21);
+            this.chkRemovePrefix.TabIndex = 15;
+            this.chkRemovePrefix.Text = "Remove table name prefix?";
+            this.chkRemovePrefix.UseVisualStyleBackColor = true;
+            this.chkRemovePrefix.CheckedChanged += new System.EventHandler(this.chkRemovePrefix_CheckedChanged);
+            // 
+            // txtPrefix
+            // 
+            this.txtPrefix.Enabled = false;
+            this.txtPrefix.Location = new System.Drawing.Point(240, 563);
+            this.txtPrefix.Name = "txtPrefix";
+            this.txtPrefix.Size = new System.Drawing.Size(251, 24);
+            this.txtPrefix.TabIndex = 16;
             // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1003, 641);
+            this.Controls.Add(this.txtPrefix);
+            this.Controls.Add(this.chkRemovePrefix);
+            this.Controls.Add(this.tvTemplates);
             this.Controls.Add(this.btnConnect);
             this.Controls.Add(this.btnSaveConnString);
             this.Controls.Add(this.cmbConnString);
@@ -213,7 +242,6 @@
             this.Controls.Add(this.btnOutputPath);
             this.Controls.Add(this.txtOutputPath);
             this.Controls.Add(this.lblOutputPath);
-            this.Controls.Add(this.lstTemplates);
             this.Controls.Add(this.lblTemplates);
             this.Controls.Add(this.lblDBView);
             this.Controls.Add(this.tvDBView);
@@ -234,7 +262,6 @@
         private System.Windows.Forms.TreeView tvDBView;
         private System.Windows.Forms.Label lblDBView;
         private System.Windows.Forms.Label lblTemplates;
-        private System.Windows.Forms.ListView lstTemplates;
         private System.Windows.Forms.Label lblOutputPath;
         private System.Windows.Forms.TextBox txtOutputPath;
         private System.Windows.Forms.Button btnOutputPath;
@@ -246,6 +273,10 @@
         private System.Windows.Forms.ComboBox cmbConnString;
         private System.Windows.Forms.Button btnSaveConnString;
         private System.Windows.Forms.Button btnConnect;
+        private System.Windows.Forms.ToolTip Tip;
+        private System.Windows.Forms.TreeView tvTemplates;
+        private System.Windows.Forms.CheckBox chkRemovePrefix;
+        private System.Windows.Forms.TextBox txtPrefix;
     }
 }
 

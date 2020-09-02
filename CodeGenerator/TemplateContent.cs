@@ -3,143 +3,47 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace SimpleCodeGen
+namespace SimpleCodeGen.CodeGenerator
 {
     /// <summary>
-    /// Contenido de un template de tabla
+    /// Content of a template
     /// </summary>
     public class TemplateContent
     {
-        public string NombreBaseDatos { get; set; }
-        public string NombreTabla { get; set; }
-        public string NombreClavePrimaria { get; set; }
+        public string DatabaseName { get; set; }
+        public string TableName { get; set; }
+        public string PrimaryKeyName { get; set; }
+
+        public string ClassName { get; set; }
+
 
         /// <summary>
-        /// Sólo lectura. Quitamos el prefijo "db" de los nombres de Base de Datos
+        /// Column collection of the table
         /// </summary>
-        public string NombreBaseDatosSinPrefijo
-        {
-            get
-            {
-                if (NombreBaseDatos != "")
-                {
-                    if (NombreBaseDatos.Substring(0, 2) == "db")
-                    {
-                        return NombreBaseDatos.Substring(2);
-                    }
-                    else return NombreBaseDatos;
-                }
-                else return "";
-            }
-        }
+        public List<ColumnItem> Columns { get; set; }
 
         /// <summary>
-        /// Sólo lectura. Quitamos el prefijo XXX_ de los nombres de tabla
+        /// Template generation date
         /// </summary>
-        public string NombreTablaSinPrefijo
-        {
-            get
-            {
-                if (NombreTabla != "")
-                {
-                    if (NombreTabla.Substring(3, 1) == "_")
-                    {
-                        return NombreTabla.Substring(4);
-                    }
-                    else return NombreTabla;
-                }
-                else return "";
-            }
-        }
+        public DateTime GenDate { get; private set; }
 
         /// <summary>
-        /// Sólo lectura. El nombre de la tabla en singular
-        /// </summary>
-        public string NombreClase
-        {
-            get { return ToSingular(this.NombreTabla); }
-        }
-
-        /// <summary>
-        /// Colección de columnas de la tabla
-        /// </summary>
-        public List<ColumnItem> Columnas { get; set; }
-
-        /// <summary>
-        /// Sólo lectura. Los nombres de columnas unidos por comas:
-        /// "Col1, Col2, Col3"
-        /// </summary>
-        public string ListaNombreColumnas
-        {
-            get
-            {
-                List<string> nombreCols = new List<string>();
-                foreach (ColumnItem col in Columnas) { nombreCols.Add(col.NombreColumna); }
-                return string.Join(", ", nombreCols);
-            }
-        }
-
-        /// <summary>
-        /// Sólo lectura. Los nombres de columnas unidos por comas y con el prefijo arroba:
-        /// "@Col1, @Col2, @Col3"
-        /// </summary>
-        public string ListaNombreParametros
-        {
-            get
-            {
-                List<string> nombreCols = new List<string>();
-                foreach (ColumnItem col in Columnas) { nombreCols.Add("@" + col.NombreColumna); }
-                return string.Join(", ", nombreCols);
-            }
-        }
-
-        /// <summary>
-        /// Sólo lectura. Los nombres de columnas igualados a sus parámetros
-        /// Col1 = @Col1, Col2 = @Col2, Col3 = @Col3
-        /// </summary>
-        public string ListaNombreColumnasParametros
-        {
-            get
-            {
-                List<string> nombreCols = new List<string>();
-                foreach (ColumnItem col in Columnas) { nombreCols.Add(String.Format("{0} = @{0}", col.NombreColumna)); }
-                return string.Join(", ", nombreCols);
-            }
-        }
-
-        /// <summary>
-        /// Sólo lectura. Número de columnas
-        /// </summary>
-        public int NumeroColumnas
-        {
-            get
-            {
-                if (Columnas != null) { return Columnas.Count; }
-                else return 0;
-            }
-        }
-
-        /// <summary>
-        /// Sólo lectura. Fecha de generación de plantilla
-        /// </summary>
-        public DateTime FechaGeneracion { get; private set; }
-
-        /// <summary>
-        /// Ctor. Inicializa la fecha de generación
+        /// Ctor. 
+        /// Initialises generation date
         /// </summary>
         public TemplateContent()
         {
-            this.FechaGeneracion = DateTime.Today;
+            this.GenDate = DateTime.Today;
         }
 
         /// <summary>
-        /// Función privada para convertir a singular el nombre de la tabla
+        /// Converts to single and capitalizes the name of the table
         /// </summary>
-        /// <param name="tableName">El nombre de la tabla</param>
-        /// <returns>El nombre de la tabla en singular</returns>
+        /// <param name="tableName">Table name (proposals)</param>
+        /// <returns>Singular and capitalized table name (Proposal)</returns>
         private static string ToSingular(string tableName)
         {
-            //Quitamos el prefijo de la tabla
+            // Remove the table prefix
             tableName = tableName.Substring(tableName.IndexOf('_') + 1);
             //iremos construyendo un diccionario de excepciones para casos no cubiertos
             Dictionary<string, string> excepciones = new Dictionary<string, string> {
@@ -207,25 +111,28 @@ namespace SimpleCodeGen
     /// </summary>
     public class ColumnItem
     {
-        public string NombreColumna { get; set; }
-        public string TipoSql { get; set; }
-        public string TipoClr
+        private bool _isPrimaryKey;
+
+        public string ColumnName { get; set; }
+
+        public string FieldName {  get { return "FieldName"; } }
+        public string SQLType { get; set; }
+        public string CLRType
         {
-            get { return GetClrType(TipoSql); }
+            get { return GetClrType(SQLType); }
         }
 
         /// <summary>
         /// Sólo lectura (private set). Devuelve si la columna es clave primaria
         /// </summary>
-        public bool EsClavePrimaria
+        public bool IsPrimaryKey
         {
-            get { return false; }
-            private set { }
+            get { return _isPrimaryKey; }
         }
 
-        public bool NotEsClavePrimaria
+        public bool IsNotPrimaryKey
         {
-            get { return !this.EsClavePrimaria; }
+            get { return !_isPrimaryKey; }
         }
 
         /// <summary>
@@ -235,9 +142,9 @@ namespace SimpleCodeGen
         /// <param name="tipo"></param>
         public ColumnItem(string nombre, string tipo, bool esClave)
         {
-            this.NombreColumna = nombre;
-            this.TipoSql = tipo;
-            this.EsClavePrimaria = esClave;
+            this.ColumnName = nombre;
+            this.SQLType = tipo;
+            _isPrimaryKey = esClave;
         }
 
         /// <summary>

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Windows.Forms;
+using SimpleCodeGen.CodeGenerator;
 
 namespace SimpleCodeGen
 {
@@ -69,7 +70,7 @@ namespace SimpleCodeGen
         /// <summary>
         /// Cargamos el treeview con los 
         /// </summary>
-        private void LoadTreeView()
+        private void LoadDBTables()
         {
             foreach (string dbName in dbEngine.GetDatabases())
             {
@@ -88,9 +89,19 @@ namespace SimpleCodeGen
         /// </summary>
         private void LoadTemplates()
         {
-            foreach (string fichero in Directory.EnumerateFiles("templates", "*.template.scg"))
+            foreach (string directorio in Directory.EnumerateDirectories("templates"))
             {
-                lstTemplates.Items.Add(Path.GetFileNameWithoutExtension(fichero));
+                string folderName = "";
+                TreeNode parentNode = new TreeNode("tmp", 4, 4);
+                foreach (string fichero in Directory.EnumerateFiles(directorio, "*.template.scg"))
+                {
+                    folderName = Path.GetFileName(Path.GetDirectoryName(fichero));
+                    TreeNode childNode = new TreeNode(Path.GetFileNameWithoutExtension(fichero), 5, 5);
+                    parentNode.Nodes.Add(childNode);
+                }
+                
+                parentNode.Text = folderName;
+                tvTemplates.Nodes.Add(parentNode);
             }
         }
 
@@ -126,7 +137,7 @@ namespace SimpleCodeGen
                 List<Tuple<string, string>> tablasAProcesar = new List<Tuple<string, string>>();
                 // Bloqueamos los controles mientras se procesa la cosa
                 tvDBView.Enabled = false;
-                lstTemplates.Enabled = false;
+                tvTemplates.Enabled = false;
                 btnGenerateCode.Enabled = false;
 
                 // Vamos a ver qué tablas queremos procesar
@@ -138,6 +149,7 @@ namespace SimpleCodeGen
                         {
                             if (son.Checked)
                             {
+                                // parent.Text = DATABASE, son.Text = TABLE
                                 tablasAProcesar.Add(new Tuple<string, string>(parent.Text, son.Text));
                             }
                         }
@@ -146,21 +158,39 @@ namespace SimpleCodeGen
 
                 foreach (Tuple<string, string> tupla in tablasAProcesar)
                 {
-                    foreach (ListViewItem item in lstTemplates.Items)
+                    foreach (TreeNode parent in tvTemplates.Nodes)
                     {
-                        if (item.Checked)
+                        if(parent.Nodes.Count > 0)
                         {
-                            //Limpiamos el nombre de la tabla
-                            string tName = tupla.Item2;
-                            if (tName.Substring(3, 1) == "_") tName = tName.Substring(4);
+                            foreach(TreeNode son in parent.Nodes)
+                            {
+                                if (son.Checked)
+                                {
+                                    //Limpiamos el nombre de la tabla
+                                    string tableName = tupla.Item2;
+                                    string fileSuffix = son.Text.Substring(0, son.Text.IndexOf("."));
+                                    if(chkRemovePrefix.Checked)
+                                    {
+                                        if(txtPrefix.Text != string.Empty)
+                                        {
+                                            if(tableName.Contains(txtPrefix.Text))
+                                            {
+                                                tableName = tableName.Remove(0, txtPrefix.Text.Length);
+                                                tableName = string.Format("{0}{1}", tableName.Substring(0, 1).ToUpper(), tableName.Substring(1));
+                                            }
+                                        }
+                                    }
 
-                            txtResults.AppendText(String.Format("Creando {0}{1}.generado.vb ... ", tName, item.Text));
+                                    string ext = son.Text.Contains(".cs.") ? "cs" : "vb";
+                                    string outputPath = Path.Combine(txtOutputPath.Text, String.Format("{0}{1}.{2}", tableName, son.Text, ext));
+                                    string templatePath = String.Format(@"templates\{0}\{1}.scg", parent.Text, son.Text);
 
-                            templateEngine.Generate(tupla.Item1, tupla.Item2,
-                                Path.Combine(txtOutputPath.Text, String.Format("{0}{1}.generado.vb", tName, item.Text)),
-                                String.Format(@"templates\{0}.scg", item.Text));
+                                    txtResults.AppendText(String.Format("Creando {0}{1}.{2} ... ", tableName, fileSuffix, ext));
 
-                            txtResults.AppendText("OK" + Environment.NewLine);
+                                    templateEngine.Generate(tupla.Item1, tupla.Item2, tableName, outputPath, templatePath);
+                                    txtResults.AppendText("OK" + Environment.NewLine);
+                                }
+                            }
                         }
                         Application.DoEvents();
                     }
@@ -173,7 +203,7 @@ namespace SimpleCodeGen
 
             // Desbloqueamos los controles al terminar
             tvDBView.Enabled = true;
-            lstTemplates.Enabled = true;
+            tvTemplates.Enabled = true;
             btnGenerateCode.Enabled = true;
         }
 
@@ -206,12 +236,24 @@ namespace SimpleCodeGen
             }
 
             bool someTemplateIsChecked = false;
-            foreach (ListViewItem item in lstTemplates.Items)
+            foreach (TreeNode parent in tvTemplates.Nodes)
             {
-                if (item.Checked)
+                if (parent.Checked)
                 {
                     someTemplateIsChecked = true;
                     break;
+                }
+                else
+                {
+                    foreach (TreeNode son in parent.Nodes)
+                    {
+                        if (son.Checked)
+                        {
+                            someTemplateIsChecked = true;
+                            break;
+                        }
+                    }
+                    if (someTemplateIsChecked) break;
                 }
             }
 
@@ -250,12 +292,7 @@ namespace SimpleCodeGen
             return true;
         }
 
-        /// <summary>
-        /// Comprobamos si se ha checado u nodo padre y en ese caso checamos todos los hijos
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void tvDBView_AfterCheck(object sender, TreeViewEventArgs e)
+        private void TreeViewAfterCheck(object sender, TreeViewEventArgs e)
         {
             TreeNode parent = e.Node;
             if (parent.Nodes.Count > 0) //es nodo padre
@@ -290,8 +327,13 @@ namespace SimpleCodeGen
             {
                 dbEngine = new DBEngine(cmbConnString.Text);
                 templateEngine = new TemplateEngine(dbEngine);
-                LoadTreeView();
+                LoadDBTables();
             }
+        }
+
+        private void chkRemovePrefix_CheckedChanged(object sender, EventArgs e)
+        {
+            txtPrefix.Enabled = chkRemovePrefix.Checked;
         }
     }
 }
